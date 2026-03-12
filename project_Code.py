@@ -1,25 +1,3 @@
-# -*- coding: utf-8 -*-
-#
-# 🟢 โค้ดฉบับอัปเดต: Hybrid Menu - รูปใหญ่, ถามจำนวน, เรียงตะกร้าใหม่
-# 🟢 อัปเดตล่าสุด: เพิ่มหน้าเงิน, แก้ Flow หน้ารวม, ลบราคาออกจากหน้าเพิ่ม
-#
-# 🟢 อัปเดต (Gemini): (1) แก้ไขหน้า Admin Edit เป็นหน้าจัดการโต๊ะ
-# 🟢 อัปเดต (Gemini): (2) เปลี่ยน UI หน้า Admin ให้เหมือนหน้าโต๊ะ + เพิ่มปุ่ม "แก้ไข"
-# 🟢 อัปเดต (Gemini): (3) [Admin] เพิ่มปุ่มกลับหน้ารวม, [Login] Staff ไปหน้า Admin ทันที
-# 🟢 อัปเดต (Gemini): (4) แก้เวลา Order, แก้ปุ่มลัด Login, แก้การเพิ่ม/แสดงผลเมนู
-#
-# 🟢 อัปเดต (User): (1) [Login] Staff เปลี่ยนไปหน้า 'หน้ารวม' (summary_page)
-# 🟢 อัปเดต (User): (2) [Login] ปุ่มลัด (679,642) เปลี่ยนไปหน้า 'หน้าแก้' (fix_page)
-# 🟢 อัปเดต (User): (3) เพิ่ม 'หน้าแก้.png' เป็นหน้าใหม่
-#
-# 🟢 อัปเดต (Gemini): (5) [Fix Page] 'หน้าแก้' เพิ่มช่องกรอก Username/Password เพื่อไปหน้า Profile
-#
-# 🟢 อัปเดต (Gemini): (6) [Money Page] เปลี่ยนเป็นช่องกรอกจำนวนคน, ไปหน้าบิล
-# 🟢 อัปเดต (Gemini): (7) [Payment Popup] เปลี่ยน QR Code เป็น .jpg
-#
-# 🟢 อัปเดต (Gemini): (8) [Money Page] เปลี่ยนเป็นปุ่มคลิก 1-6+ คน (ตาม User Request)
-# 🟢 อัปเดต (Gemini): (9) [Bill Page] เพิ่มหน้าบิล (Mooay Noi) และเชื่อมปุ่มยืนยัน QR (ตาม User Request)
-
 import tkinter as tk
 from tkinter import messagebox, simpledialog, filedialog
 import shutil
@@ -27,8 +5,7 @@ from PIL import Image, ImageTk
 import os
 from collections import defaultdict
 import sqlite3
-import datetime # 🟢 NEW: สำหรับจัดการเวลา
-# 🟢 NEW: (เพิ่ม) สำหรับแก้ไขเวลา
+import datetime
 from datetime import timedelta 
 
 # --------------------------------------------------------------------------------------
@@ -36,13 +13,13 @@ from datetime import timedelta
 # --------------------------------------------------------------------------------------
 
 # --- หมวดที่ 2: การตั้งค่าและค่าคงที่ (Configuration & Constants) ---
-BASE_DIR = os.path.normpath(r"D:\Code_Python\โปรเจคจร้า") # <- Adjust this path if needed
+BASE_DIR = os.path.normpath(r"D:\Code_Python\โปรเจคจร้า") 
 
-# 🟢 Database Settings
+#Database Settings
 DATABASE_NAME = "Database.db"
 DATABASE_PATH = os.path.join(BASE_DIR, DATABASE_NAME)
 
-# ⭐️ Profile Image Folder
+#Profile Image Folder
 PROFILE_DIR = os.path.join(BASE_DIR, "Profile")
 
 IMAGE_PATHS = {
@@ -59,8 +36,8 @@ IMAGE_PATHS = {
     "placeholder_image": os.path.join(BASE_DIR, "กล้อง.png"),
     "order_status_page_bg": os.path.join(BASE_DIR, "หน้าorder.png"),
     "money_page_bg": os.path.join(BASE_DIR, "หน้าเงิน.png"),
-    "bill_page_bg": os.path.join(BASE_DIR, "หน้าบิล.png"), # 🟢 NEW: (เพิ่ม) หน้าบิล
-    "fix_page_bg": os.path.join(BASE_DIR, "หน้าแก้.png") # 🟢 NEW: (เพิ่ม) หน้าแก้
+    "bill_page_bg": os.path.join(BASE_DIR, "หน้าบิล.png"),
+    "fix_page_bg": os.path.join(BASE_DIR, "หน้าแก้.png")
 }
 
 WINDOW_WIDTH = 1000
@@ -69,10 +46,10 @@ WINDOW_SIZE = f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}"
 
 CATEGORY_OPTIONS = ["เลือกประเภท...", "เนื้อ", "อาหารทะเล", "ผักผลไม้", "ของทานเล่น", "ของหวาน"]
 
-# --- หมวดที่ 3: พิกัดพื้นที่ที่คลิกได้ (อ้างอิงจากภาพต้นฉบับ) ---
+# --- หมวดที่ 3: พิกัดพื้นที่ที่คลิกได้ ---
 ORIG_MENU_PROFILE_BOX = {"x": 1242, "y": 18, "width": 100, "height": 100}
 
-# --- หมวดที่ 4: หน้าล็อกอิน (Login Page) ---
+# --- หมวดที่ 4: หน้าล็อกอิน ---
 ORIG_LOGIN_USERNAME_LABEL = {"x": 450, "y": 250, "width": 150, "height": 30}
 ORIG_LOGIN_USERNAME_BOX = {"x": 450, "y": 285, "width": 460, "height": 60}
 ORIG_LOGIN_PASSWORD_LABEL = {"x": 450, "y": 350, "width": 150, "height": 30}
@@ -105,10 +82,10 @@ ADMIN_EDIT_BUTTON_REGION = {
     "y_start": ADMIN_EDIT_CENTER_Y - ADMIN_EDIT_H_HALF, "y_end": ADMIN_EDIT_CENTER_Y + ADMIN_EDIT_H_HALF
 }
 
-# 🟢 (แก้ไข) ปุ่มลัดไปหน้า "แก้" จากหน้า Login (X: 678 , Y: 641)
+#ปุ่มลัดไปหน้า "แก้" จากหน้า Login
 LOGIN_GOTO_ADMIN_CENTER_X = 678
 LOGIN_GOTO_ADMIN_CENTER_Y = 641
-LOGIN_GOTO_ADMIN_W_HALF = 100 # (ตั้งค่า W/H ประมาณ)
+LOGIN_GOTO_ADMIN_W_HALF = 100
 LOGIN_GOTO_ADMIN_H_HALF = 40
 LOGIN_GOTO_ADMIN_REGION = {
     "x_start": LOGIN_GOTO_ADMIN_CENTER_X - LOGIN_GOTO_ADMIN_W_HALF, "x_end": LOGIN_GOTO_ADMIN_CENTER_X + LOGIN_GOTO_ADMIN_W_HALF,
@@ -116,29 +93,26 @@ LOGIN_GOTO_ADMIN_REGION = {
 }
 
 # ----------------------------------------------------------------------
-# 🟢 START: (แก้ไข 3) และ (แก้ไข 4) (หน้าแก้)
+# 🟢 START และ หน้าแก้
 # ----------------------------------------------------------------------
-# 🟢 (เพิ่ม 3) พิกัดปุ่มยืนยัน "หน้าแก้" (X: 1181 , Y: 624)
+# พิกัดปุ่มยืนยัน "หน้าแก้"
 FIX_CONFIRM_CENTER_X = 1181
 FIX_CONFIRM_CENTER_Y = 624
-FIX_CONFIRM_W_HALF = 150 # (ใช้ขนาดเดียวกับปุ่ม Login)
-FIX_CONFIRM_H_HALF = 30 # (ใช้ขนาดเดียวกับปุ่ม Login)
+FIX_CONFIRM_W_HALF = 150 
+FIX_CONFIRM_H_HALF = 30 
 FIX_PAGE_CONFIRM_REGION = {
     "x_start": FIX_CONFIRM_CENTER_X - FIX_CONFIRM_W_HALF, "x_end": FIX_CONFIRM_CENTER_X + FIX_CONFIRM_W_HALF,
     "y_start": FIX_CONFIRM_CENTER_Y - FIX_CONFIRM_H_HALF, "y_end": FIX_CONFIRM_CENTER_Y + FIX_CONFIRM_H_HALF
 }
 
-# 🟢 (เพิ่ม 4) พิกัดช่องกรอก "หน้าแก้" (ขยับ Y ลง 100)
+#พิกัดช่องกรอก "หน้าแก้"
 FIX_PAGE_Y_OFFSET = 100
 ORIG_FIX_USERNAME_LABEL = {"x": 450, "y": 250 + FIX_PAGE_Y_OFFSET, "width": 150, "height": 30}
 ORIG_FIX_USERNAME_BOX = {"x": 450, "y": 285 + FIX_PAGE_Y_OFFSET, "width": 460, "height": 60}
 ORIG_FIX_PASSWORD_LABEL = {"x": 450, "y": 350 + FIX_PAGE_Y_OFFSET, "width": 150, "height": 30}
 ORIG_FIX_PASSWORD_BOX = {"x": 450, "y": 385 + FIX_PAGE_Y_OFFSET, "width": 460, "height": 60}
-# ----------------------------------------------------------------------
-# 🟢 END: (แก้ไข 3) และ (แก้ไข 4)
-# ----------------------------------------------------------------------
 
-# --- หมวดที่ 5: หน้าลงทะเบียน (Register Page) ---
+# --- หมวดที่ 5: หน้าลงทะเบียน ---
 REG_L_COL_X = 318
 REG_R_COL_X = 706
 REG_BOX_W = 310
@@ -161,7 +135,7 @@ REGISTER_CONFIRM_BUTTON_REGION = {
     "y_start": REG_CONFIRM_CENTER_Y - REG_CONFIRM_H_HALF, "y_end": REG_CONFIRM_CENTER_Y + REG_CONFIRM_H_HALF
 }
 
-# --- หมวดที่ 6: หน้าลืมรหัสผ่าน (Forgot Page) ---
+# --- หมวดที่ 6: หน้าลืมรหัสผ่าน ---
 FORGOT_BOX_W = 400; FORGOT_BOX_H = 60; FORGOT_LBL_H = 30
 ORIG_FORGOT_EMAIL_LABEL = {"x": 475, "y": 324, "width": FORGOT_BOX_W, "height": FORGOT_LBL_H}
 ORIG_FORGOT_EMAIL_BOX   = {"x": 475, "y": 355, "width": FORGOT_BOX_W, "height": FORGOT_BOX_H}
@@ -173,29 +147,29 @@ FORGOT_CONFIRM_BUTTON_REGION = {
     "y_start": FORGOT_CONFIRM_CENTER_Y - FORGOT_CONFIRM_H_HALF, "y_end": FORGOT_CONFIRM_CENTER_Y + FORGOT_CONFIRM_H_HALF
 }
 
-# --- หมวดที่ 7: หน้าแก้ไขของแอดมิน (Admin Edit Page) ---
-# 🟢 NEW: ปุ่ม "แก้ไข" (ปุ่มกลาง) ในหน้า Admin (X: 681 , Y: 512)
+# --- หมวดที่ 7: หน้าแก้ไขของแอดมิน ---
+#ปุ่ม "แก้ไข" ในหน้า Admin 
 ADMIN_EDIT_TABLE_CENTER_X = 681
 ADMIN_EDIT_TABLE_CENTER_Y = 512
-ADMIN_EDIT_TABLE_W_HALF = 100 # (ตั้งค่า W/H ประมาณ)
+ADMIN_EDIT_TABLE_W_HALF = 100
 ADMIN_EDIT_TABLE_H_HALF = 40
 ADMIN_EDIT_TABLE_BUTTON_REGION = {
     "x_start": ADMIN_EDIT_TABLE_CENTER_X - ADMIN_EDIT_TABLE_W_HALF, "x_end": ADMIN_EDIT_TABLE_CENTER_X + ADMIN_EDIT_TABLE_W_HALF,
     "y_start": ADMIN_EDIT_TABLE_CENTER_Y - ADMIN_EDIT_TABLE_H_HALF, "y_end": ADMIN_EDIT_TABLE_CENTER_Y + ADMIN_EDIT_TABLE_H_HALF
 }
 
-# 🟢 NEW: ปุ่ม "กลับไปหน้ารวม" (X: 472 , Y: 502)
+#ปุ่ม "กลับไปหน้ารวม"
 ADMIN_BACK_TO_SUMMARY_CENTER_X = 472
 ADMIN_BACK_TO_SUMMARY_CENTER_Y = 502
-ADMIN_BACK_TO_SUMMARY_W_HALF = 100 # (ประมาณ)
-ADMIN_BACK_TO_SUMMARY_H_HALF = 40 # (ประมาณ)
+ADMIN_BACK_TO_SUMMARY_W_HALF = 100 
+ADMIN_BACK_TO_SUMMARY_H_HALF = 40 
 ADMIN_BACK_TO_SUMMARY_REGION = {
     "x_start": ADMIN_BACK_TO_SUMMARY_CENTER_X - ADMIN_BACK_TO_SUMMARY_W_HALF, "x_end": ADMIN_BACK_TO_SUMMARY_CENTER_X + ADMIN_BACK_TO_SUMMARY_W_HALF,
     "y_start": ADMIN_BACK_TO_SUMMARY_CENTER_Y - ADMIN_BACK_TO_SUMMARY_H_HALF, "y_end": ADMIN_BACK_TO_SUMMARY_CENTER_Y + ADMIN_BACK_TO_SUMMARY_H_HALF
 }
 
 
-# --- หมวดที่ 8: หน้าข้อมูลโปรไฟล์ (Profile Page) ---
+# --- หมวดที่ 8: หน้าข้อมูลโปรไฟล์ ---
 PROF_L_COL_X = 318
 PROF_R_COL_X = 706
 PROF_BOX_W = 310
@@ -226,7 +200,7 @@ PROFILE_CONFIRM_BUTTON_REGION = {
 }
 
 
-# --- หมวดที่ 9: องค์ประกอบทั่วไปของหน้า (General Page Elements) ---
+# --- หมวดที่ 9: องค์ประกอบทั่วไปของหน้า ---
 CART_ICON_REGION = {"x_start": 0, "x_end": 70, "y_start": 0, "y_end": 70} 
 BACK_ICON_REGION = {"x_start": 20, "x_end": 90, "y_start": 20, "y_end": 90} 
 
@@ -242,7 +216,7 @@ DELETE_MENU_BUTTON = {"x_start": 890, "x_end": 1050, "y_start": 350, "y_end": 39
 ORIG_TEXTBOX_X = 320; ORIG_TEXTBOX_Y = 409; ORIG_TEXTBOX_W = 710; ORIG_TEXTBOX_H = 510
 
 # ----------------------------------------------------------------------
-# 🟢 START: (แก้ไข) หมวดที่ 10: หน้ารวม (Summary Page Specific)
+#หมวดที่ 10: หน้ารวม
 # ----------------------------------------------------------------------
 SUMMARY_ADD_ITEM_CENTER_X = 679
 SUMMARY_ADD_ITEM_CENTER_Y = 347
@@ -262,35 +236,32 @@ SUMMARY_GOTO_ORDER_REGION = {
     "y_start": SUMMARY_ORDER_CENTER_Y - SUMMARY_ORDER_H_HALF, "y_end": SUMMARY_ORDER_CENTER_Y + SUMMARY_ORDER_H_HALF
 }
 
-# 🟢 NEW: ปุ่มไปหน้าเจ้าหน้าที่ (Admin Edit)
+#ปุ่มไปหน้าเจ้าหน้าที่
 SUMMARY_ADMIN_EDIT_CENTER_X = 1153
 SUMMARY_ADMIN_EDIT_CENTER_Y = 355
-SUMMARY_ADMIN_EDIT_W_HALF = 100 # (ใช้ค่าประมาณ)
-SUMMARY_ADMIN_EDIT_H_HALF = 40 # (ใช้ค่าประมาณ)
+SUMMARY_ADMIN_EDIT_W_HALF = 100 
+SUMMARY_ADMIN_EDIT_H_HALF = 40 
 SUMMARY_ADMIN_EDIT_REGION = {
     "x_start": SUMMARY_ADMIN_EDIT_CENTER_X - SUMMARY_ADMIN_EDIT_W_HALF, "x_end": SUMMARY_ADMIN_EDIT_CENTER_X + SUMMARY_ADMIN_EDIT_W_HALF,
     "y_start": SUMMARY_ADMIN_EDIT_CENTER_Y - SUMMARY_ADMIN_EDIT_H_HALF, "y_end": SUMMARY_ADMIN_EDIT_CENTER_Y + SUMMARY_ADMIN_EDIT_H_HALF
 }
 
-# 🟢 NEW: ปุ่มไปหน้าเงิน
+#ปุ่มไปหน้าเงิน
 SUMMARY_MONEY_CENTER_X = 201
 SUMMARY_MONEY_CENTER_Y = 486
-SUMMARY_MONEY_W_HALF = 100 # (ใช้ค่าประมาณ)
-SUMMARY_MONEY_H_HALF = 40 # (ใช้ค่าประมาณ)
+SUMMARY_MONEY_W_HALF = 100 
+SUMMARY_MONEY_H_HALF = 40 
 SUMMARY_MONEY_PAGE_REGION = {
     "x_start": SUMMARY_MONEY_CENTER_X - SUMMARY_MONEY_W_HALF, "x_end": SUMMARY_MONEY_CENTER_X + SUMMARY_MONEY_W_HALF,
     "y_start": SUMMARY_MONEY_CENTER_Y - SUMMARY_MONEY_H_HALF, "y_end": SUMMARY_MONEY_CENTER_Y + SUMMARY_MONEY_H_HALF
 }
-# ----------------------------------------------------------------------
-# 🟢 END: (แก้ไข)
-# ----------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
-# 🟢 START: (แก้ไข) หน้าเงิน (Money Page Specific) - ใช้ปุ่มคลิก
+# หน้าเงิน
 # ----------------------------------------------------------------------
-MONEY_PRICE_PER_PERSON = 10 # 🟢 (ราคา 10 บาทตามโค้ดเดิม)
-MONEY_CLICK_W_HALF = 100 # (ขนาดปุ่มประมาณ)
-MONEY_CLICK_H_HALF = 50  # (ขนาดปุ่มประมาณ)
+MONEY_PRICE_PER_PERSON = 10 
+MONEY_CLICK_W_HALF = 100 
+MONEY_CLICK_H_HALF = 50  
 
 # (1 คน)
 MONEY_BTN_1_CENTER_X = 159; MONEY_BTN_1_CENTER_Y = 198
@@ -334,17 +305,13 @@ MONEY_BTN_CUSTOM_REGION = {
     "x_start": MONEY_BTN_CUSTOM_CENTER_X - MONEY_CLICK_W_HALF, "x_end": MONEY_BTN_CUSTOM_CENTER_X + MONEY_CLICK_W_HALF,
     "y_start": MONEY_BTN_CUSTOM_CENTER_Y - MONEY_CLICK_H_HALF, "y_end": MONEY_BTN_CUSTOM_CENTER_Y + MONEY_CLICK_H_HALF
 }
-# ----------------------------------------------------------------------
-# 🟢 END: (แก้ไข)
-# ----------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
-# 🟢 START: (เพิ่ม) หน้าบิล (Bill Page Specific) - พิกัด Layout
+# หน้าบิล
 # ----------------------------------------------------------------------
-# (พิกัดอ้างอิงจากโลโก้ Mooay Noi ที่อยู่ด้านบน)
-BILL_CENTER_X = 1366 // 2 # (683)
+BILL_CENTER_X = 1366 // 2 
 BILL_CONTENT_WIDTH = 600
-BILL_CONTENT_START_X = BILL_CENTER_X - (BILL_CONTENT_WIDTH // 2) # (383)
+BILL_CONTENT_START_X = BILL_CENTER_X - (BILL_CONTENT_WIDTH // 2) 
 
 # (Header)
 ORIG_BILL_HEADER_L1 = {"x": BILL_CONTENT_START_X, "y": 360, "width": BILL_CONTENT_WIDTH, "height": 40} # ชื่อร้าน
@@ -367,12 +334,8 @@ ORIG_BILL_TOTAL     = {"x": BILL_CONTENT_START_X, "y": 695, "width": BILL_CONTEN
 # (Footer Message)
 ORIG_BILL_FOOTER1   = {"x": BILL_CONTENT_START_X, "y": 740, "width": BILL_CONTENT_WIDTH, "height": 25} # (ชำระแล้ว)
 ORIG_BILL_FOOTER2   = {"x": BILL_CONTENT_START_X, "y": 765, "width": BILL_CONTENT_WIDTH, "height": 25} # (ขอบคุณ)
-# ----------------------------------------------------------------------
-# 🟢 END: (เพิ่ม)
-# ----------------------------------------------------------------------
 
-
-# --- หมวดที่ 11: หน้าเมนูอาหาร (Food Menu Specific) ---
+# --- หมวดที่ 11: หน้าเมนูอาหาร ---
 MENU_SUB_FRAME_REGION = {"x_start": 230, "y_start": 607, "x_end": 1146, "y_end": 3802} 
 
 ANCHOR_BUTTONS = [
@@ -444,7 +407,7 @@ MENU_BACK_TO_TABLE_REGION = {
     "y_start": MENU_BACK_TO_TABLE_CENTER_Y - MENU_BACK_TO_TABLE_H_HALF, "y_end": MENU_BACK_TO_TABLE_CENTER_Y + MENU_BACK_TO_TABLE_H_HALF
 }
 
-# --- หมวดที่ 12: หน้าตารางโต๊ะ (Table Page Specific) ---
+# --- หมวดที่ 12: หน้าตารางโต๊ะ ---
 TABLE_CENTERS = [
     {"x": 407, "y": 646},{"x": 247, "y": 637},{"x": 55, "y": 636}, {"x": 76, "y": 496},{"x": 73, "y": 369},
     {"x": 69, "y": 233},{"x": 76, "y": 91},{"x": 248, "y": 73},{"x": 419, "y": 77},{"x": 421, "y": 226},
@@ -466,18 +429,14 @@ TABLE_ALIGNMENT_CENTERS = [
     {"x": 1285, "y": 500}, {"x": 1285, "y": 640}, {"x": 1118, "y": 640}, {"x": 945, "y": 640}
 ]
 
-
-# ----------------------------------------------------------------------
-# 🟢 START: (แก้ไข) ลบ "ราคา" ออกจากหน้าเพิ่ม
-# ----------------------------------------------------------------------
-# --- หมวดที่ 13: หน้าเพิ่มสินค้า (Add Item Page) ---
+# --- หมวดที่ 13: หน้าเพิ่มสินค้า ---
 ADD_ITEM_CENTER_X = 1366 // 2 # (683)
 ORIG_ADD_ITEM_IMAGE_BOX = {"x": ADD_ITEM_CENTER_X-100, "y": 250, "width": 200, "height": 150} 
 ORIG_ADD_ITEM_NAME_LABEL = {"x": ADD_ITEM_CENTER_X-150, "y": 420, "width": 100, "height": 30} 
 ORIG_ADD_ITEM_NAME_BOX = {"x": ADD_ITEM_CENTER_X-150, "y": 455, "width": 300, "height": 50} 
 ORIG_ADD_ITEM_CAT_LABEL = {"x": ADD_ITEM_CENTER_X-150, "y": 510, "width": 100, "height": 30} 
 ORIG_ADD_ITEM_CAT_BOX = {"x": ADD_ITEM_CENTER_X-150, "y": 545, "width": 300, "height": 50} 
-# (ลบช่องราคา)
+
 
 ADD_ITEM_CONFIRM_CENTER_X = 1205
 ADD_ITEM_CONFIRM_CENTER_Y = 635
@@ -488,7 +447,7 @@ ADD_ITEM_CONFIRM_REGION = {
     "y_start": ADD_ITEM_CONFIRM_CENTER_Y - ADD_ITEM_CONFIRM_H_HALF, "y_end": ADD_ITEM_CONFIRM_CENTER_Y + ADD_ITEM_CONFIRM_H_HALF
 }
 
-# 🟢 NEW: ปุ่มยืนยันอันใหม่ (X: 1200 , Y: 638)
+#ปุ่มยืนยันอันใหม่ 
 ADD_ITEM_CONFIRM_NEW_CENTER_X = 1200
 ADD_ITEM_CONFIRM_NEW_CENTER_Y = 638
 ADD_ITEM_CONFIRM_NEW_W_HALF = 70 
@@ -506,15 +465,9 @@ DELETE_ITEM_BUTTON_REGION = {
     "x_start": DELETE_ITEM_CENTER_X - DELETE_ITEM_W_HALF, "x_end": DELETE_ITEM_CENTER_X + DELETE_ITEM_W_HALF,
     "y_start": DELETE_ITEM_CENTER_Y - DELETE_ITEM_H_HALF, "y_end": DELETE_ITEM_CENTER_Y + DELETE_ITEM_H_HALF
 }
-# ----------------------------------------------------------------------
-# 🟢 END: (แก้ไข)
-# ----------------------------------------------------------------------
 
-# --- หมวดที่ 14: หน้า Order Status (พิกัด Text) ---
+# --- หมวดที่ 14: หน้า Order Status ---
 ORIG_ORDER_STATUS_BOX = {"x": 100, "y": 200, "width": 1166, "height": 550}
-
-# --- จบหมวดการตั้งค่าและค่าคงที่ ---
-
 
 class ShabuApp(tk.Tk):
     def __init__(self):
@@ -542,18 +495,17 @@ class ShabuApp(tk.Tk):
         
         self.add_item_category_var = tk.StringVar()
         self.add_item_category_var.set(CATEGORY_OPTIONS[0]) 
-        # (ลบ Price Var)
         
-        # 🟢 (เพิ่ม) ตัวแปรสำหรับส่งค่าไปหน้าบิล
+        #ตัวแปรสำหรับส่งค่าไปหน้าบิล
         self.final_bill_amount = 0 # (ยอดรวมที่คำนวณแล้ว)
         self.final_bill_person_count = 0 # (จำนวนคน)
 
-        # 🟢 (เพิ่ม) ตัวแปรสำหรับแสดงผลบนหน้าบิล
+        #ตัวแปรสำหรับแสดงผลบนหน้าบิล
         self.bill_header_l1_var = tk.StringVar()
         self.bill_header_l2_var = tk.StringVar()
         self.bill_header_l3_var = tk.StringVar()
         self.bill_header_l4_var = tk.StringVar()
-        self.bill_divider_var = tk.StringVar(value="-"*60) # (เส้นคั่น)
+        self.bill_divider_var = tk.StringVar(value="-"*60)
         self.bill_info_l1_var = tk.StringVar()
         self.bill_body_header_var = tk.StringVar()
         self.bill_body_item_var = tk.StringVar()
@@ -563,7 +515,7 @@ class ShabuApp(tk.Tk):
         self.bill_footer1_var = tk.StringVar()
         self.bill_footer2_var = tk.StringVar()
 
-        # 🟢 (เพิ่ม) ตัวแปรสำหรับหน้าแก้
+        #ตัวแปรสำหรับหน้าแก้
         self.fix_username_var = tk.StringVar()
         self.fix_password_var = tk.StringVar()
 
@@ -573,7 +525,7 @@ class ShabuApp(tk.Tk):
         self.profile_display_email = tk.StringVar()
         self.profile_display_password = tk.StringVar() 
 
-        # Original Images (PIL format)
+        # Original Images
         self.original_table_page_image = None
         self.original_login_image = None
         self.original_food_menu_image = None
@@ -586,9 +538,9 @@ class ShabuApp(tk.Tk):
         self.original_add_item_page_image = None
         self.original_placeholder_image = None
         self.original_order_status_page_image = None 
-        self.original_money_page_image = None # 🟢 NEW (เผื่อมีรูป)
-        self.original_bill_page_image = None # 🟢 NEW (เพิ่ม)
-        self.original_fix_page_image = None # 🟢 NEW (เพิ่ม)
+        self.original_money_page_image = None 
+        self.original_bill_page_image = None 
+        self.original_fix_page_image = None 
 
         # Tkinter Image References
         self.table_bg_image_tk = None
@@ -607,10 +559,10 @@ class ShabuApp(tk.Tk):
         self.add_item_image_preview_tk = None
         self.placeholder_image_tk = None
         self.order_status_bg_image_tk = None 
-        self.money_page_bg_image_tk = None # 🟢 NEW
-        self.bill_page_bg_image_tk = None # 🟢 NEW (เพิ่ม)
-        self.fix_page_bg_image_tk = None # 🟢 NEW (เพิ่ม)
-        self.qr_photo_tk = None # 🟢 NEW (สำหรับ Pop-up)
+        self.money_page_bg_image_tk = None 
+        self.bill_page_bg_image_tk = None 
+        self.fix_page_bg_image_tk = None 
+        self.qr_photo_tk = None 
         
         self.sub_canvas = None 
         self.menu_items_frame = None
@@ -630,7 +582,7 @@ class ShabuApp(tk.Tk):
         # Table Status
         self.table_status = ['available'] * len(TABLE_CENTERS)
         self.table_status_labels_table_page = []
-        self.table_status_labels_admin_page = [] # 🟢 NEW
+        self.table_status_labels_admin_page = [] 
 
         # Initialization
         if not self.check_file_paths(): self.quit(); return
@@ -653,12 +605,11 @@ class ShabuApp(tk.Tk):
     def check_file_paths(self):
         all_ok = True
         for name, path in IMAGE_PATHS.items():
-            # 🟢 NEW: (แก้ไข) อนุญาตให้ไฟล์หน้าเงิน, หน้าบิล หายไปได้
-            if name in ["money_page_bg", "bill_page_bg"] and not os.path.exists(path): # 🟢 (แก้ไข)
-                print(f"🟠 WARNING: Optional file '{os.path.basename(path)}' not found. Will use gray background.") # 🟢 (แก้ไข)
-                continue # ข้ามไปไฟล์ถัดไป
+            #อนุญาตให้ไฟล์หน้าเงิน, หน้าบิล หายไปได้
+            if name in ["money_page_bg", "bill_page_bg"] and not os.path.exists(path): 
+                print(f"🟠 WARNING: Optional file '{os.path.basename(path)}' not found. Will use gray background.") 
                 
-            # 🟢 (เพิ่ม) อนุญาตให้ไฟล์หน้าแก้หายไปได้
+            #อนุญาตให้ไฟล์หน้าแก้หายไปได้
             if name == "fix_page_bg" and not os.path.exists(path):
                 print(f"🟠 WARNING: Optional file 'หน้าแก้.png' not found. Will use gray background.")
                 continue # ข้ามไปไฟล์ถัดไป
@@ -672,7 +623,7 @@ class ShabuApp(tk.Tk):
     def load_original_images(self):
         try:
             for name, path in IMAGE_PATHS.items():
-                if os.path.exists(path): # 🟢 NEW: เช็คว่าไฟล์มีจริงก่อนโหลด
+                if os.path.exists(path): #เช็คว่าไฟล์มีจริงก่อนโหลด
                     attr_name = f"original_{name.replace('_bg', '_image')}"
                     setattr(self, attr_name, Image.open(path))
             print("✅ Original images loaded successfully.")
@@ -686,7 +637,7 @@ class ShabuApp(tk.Tk):
             conn = sqlite3.connect(DATABASE_PATH)
             cursor = conn.cursor()
 
-            # --- ตาราง Users (เหมือนเดิม) ---
+            # --- ตาราง Users ---
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -706,7 +657,7 @@ class ShabuApp(tk.Tk):
             cursor.execute("UPDATE users SET password = ?, profile_image_path = ? WHERE username = ?",
                            (staff_password, staff_profile_db_value, staff_username))
 
-            # --- ตาราง Orders (อัปเกรด) ---
+            # --- ตาราง Orders ---
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS Orders (
                 order_id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -722,7 +673,7 @@ class ShabuApp(tk.Tk):
             if 'status' not in order_columns: 
                 cursor.execute("ALTER TABLE Orders ADD COLUMN status TEXT DEFAULT 'pending'")
 
-            # --- ตาราง Menu (เหมือนเดิม) ---
+            # --- ตาราง Menu ---
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS Menu ( 
                 item_id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -771,7 +722,7 @@ class ShabuApp(tk.Tk):
         if page_name != "add_item_page":
             self.add_item_name_var.set("")
             self.add_item_category_var.set(CATEGORY_OPTIONS[0]) 
-            # (ลบ Price Var)
+            
             self.add_item_image_path = None; self.add_item_image_preview_tk = None
 
         if page_name == "table_page":
@@ -784,14 +735,14 @@ class ShabuApp(tk.Tk):
             pass 
             
         if page_name != "money_page":
-            pass # (หน้าเงินไม่จำเป็นต้องล้างค่าแล้ว)
+            pass 
             
-        # 🟢 NEW: (เพิ่ม)
+        
         if page_name != "bill_page":
             self.final_bill_amount = 0
             self.final_bill_person_count = 0
             
-        # 🟢 (เพิ่ม) ล้างค่าตัวแปรของหน้าแก้
+        
         if page_name != "fix_page":
             self.fix_username_var.set("")
             self.fix_password_var.set("")
@@ -808,9 +759,9 @@ class ShabuApp(tk.Tk):
             "profile_page": self.show_profile_page,
             "add_item_page": self.show_add_item_page,
             "order_status_page": self.show_order_status_page, 
-            "money_page": self.show_money_page, # 🟢 NEW
-            "bill_page": self.show_bill_page, # 🟢 NEW (เพิ่ม)
-            "fix_page": self.show_fix_page, # 🟢 NEW
+            "money_page": self.show_money_page, 
+            "bill_page": self.show_bill_page, 
+            "fix_page": self.show_fix_page, 
         }
         show_method = page_methods.get(page_name)
         if show_method: show_method()
@@ -848,11 +799,11 @@ class ShabuApp(tk.Tk):
                     return
 
         elif page == "login":
-            # 🟢 (แก้ไข) ปุ่มลัดไปหน้า "แก้" (X: 678 , Y: 641)
+            #ปุ่มลัดไปหน้า "แก้"
             if LOGIN_GOTO_ADMIN_REGION["x_start"] <= orig_x <= LOGIN_GOTO_ADMIN_REGION["x_end"] and \
                LOGIN_GOTO_ADMIN_REGION["y_start"] <= orig_y <= LOGIN_GOTO_ADMIN_REGION["y_end"]:
-                print("Shortcut to Fix Page") # 🟢 (แก้ไข)
-                self.show_page("fix_page"); return # 🟢 (แก้ไข)
+                print("Shortcut to Fix Page") 
+                self.show_page("fix_page"); return 
             
             if ADMIN_EDIT_BUTTON_REGION["x_start"] <= orig_x <= ADMIN_EDIT_BUTTON_REGION["x_end"] and \
                ADMIN_EDIT_BUTTON_REGION["y_start"] <= orig_y <= ADMIN_EDIT_BUTTON_REGION["y_end"]:
@@ -968,17 +919,17 @@ class ShabuApp(tk.Tk):
                BACK_ICON_REGION["y_start"] <= orig_y <= BACK_ICON_REGION["y_end"]:
                 self.show_page("summary_page"); return 
             
-            # 🟢 NEW: เพิ่มปุ่มกลับหน้ารวม (X: 472 , Y: 502)
+            # เพิ่มปุ่มกลับหน้ารวม (X: 472 , Y: 502)
             if ADMIN_BACK_TO_SUMMARY_REGION["x_start"] <= orig_x <= ADMIN_BACK_TO_SUMMARY_REGION["x_end"] and \
                ADMIN_BACK_TO_SUMMARY_REGION["y_start"] <= orig_y <= ADMIN_BACK_TO_SUMMARY_REGION["y_end"]:
                 self.show_page("summary_page"); return
 
-            # 🟢 NEW: เช็คปุ่ม "แก้ไข" (ปุ่มกลาง) (X: 681 , Y: 512)
+            # เช็คปุ่ม "แก้ไข" (ปุ่มกลาง) (X: 681 , Y: 512)
             if ADMIN_EDIT_TABLE_BUTTON_REGION["x_start"] <= orig_x <= ADMIN_EDIT_TABLE_BUTTON_REGION["x_end"] and \
                ADMIN_EDIT_TABLE_BUTTON_REGION["y_start"] <= orig_y <= ADMIN_EDIT_TABLE_BUTTON_REGION["y_end"]:
                 self.admin_prompt_for_table_edit(); return
             
-            # 🟢 NEW: เช็คการคลิกบนโต๊ะ (เหมือนหน้า table_page)
+            # เช็คการคลิกบนโต๊ะ 
             for i, region in enumerate(TABLE_REGIONS):
                 if region["x_start"] <= orig_x <= region["x_end"] and region["y_start"] <= orig_y <= region["y_end"]:
                     table_number = i + 1
@@ -1009,7 +960,7 @@ class ShabuApp(tk.Tk):
                ADD_ITEM_CONFIRM_REGION["y_start"] <= orig_x <= ADD_ITEM_CONFIRM_REGION["y_end"]:
                 self.process_add_item(); return
                 
-            # 🟢 NEW: ปุ่มยืนยันอันใหม่ (X: 1200 , Y: 638)
+            # ปุ่มยืนยันอันใหม่ 
             if ADD_ITEM_CONFIRM_REGION_NEW["x_start"] <= orig_x <= ADD_ITEM_CONFIRM_REGION_NEW["x_end"] and \
                ADD_ITEM_CONFIRM_REGION_NEW["y_start"] <= orig_y <= ADD_ITEM_CONFIRM_REGION_NEW["y_end"]:
                 self.process_add_item(); return
@@ -1034,7 +985,7 @@ class ShabuApp(tk.Tk):
                BACK_ICON_REGION["y_start"] <= orig_y <= BACK_ICON_REGION["y_end"]:
                 self.show_page("summary_page"); return
 
-            # 🟢 (แก้ไข) ตรวจสอบปุ่ม 1-6 คน
+            # ตรวจสอบปุ่ม 1-6 คน
             if MONEY_BTN_1_REGION["x_start"] <= orig_x <= MONEY_BTN_1_REGION["x_end"] and \
                MONEY_BTN_1_REGION["y_start"] <= orig_y <= MONEY_BTN_1_REGION["y_end"]:
                 print("Clicked 1 Person")
@@ -1065,38 +1016,33 @@ class ShabuApp(tk.Tk):
                 print("Clicked 6 People")
                 self.process_payment(6); return
 
-            # 🟢 (แก้ไข) ตรวจสอบปุ่มกำหนดเอง
+            # ตรวจสอบปุ่มกำหนดเอง
             if MONEY_BTN_CUSTOM_REGION["x_start"] <= orig_x <= MONEY_BTN_CUSTOM_REGION["x_end"] and \
                MONEY_BTN_CUSTOM_REGION["y_start"] <= orig_y <= MONEY_BTN_CUSTOM_REGION["y_end"]:
                 print("Clicked Custom")
                 self.process_payment_custom(); return
         
-        # 🟢 NEW: (เพิ่ม)
+       
         elif page == "bill_page":
             if BACK_ICON_REGION["x_start"] <= orig_x <= BACK_ICON_REGION["x_end"] and \
                BACK_ICON_REGION["y_start"] <= orig_y <= BACK_ICON_REGION["y_end"]:
-                self.show_page("money_page"); return # (กลับไปหน้าเงิน)
+                self.show_page("money_page"); return 
 
-        elif page == "fix_page": # 🟢 NEW
+        elif page == "fix_page":
             if BACK_ICON_REGION["x_start"] <= orig_x <= BACK_ICON_REGION["x_end"] and \
                BACK_ICON_REGION["y_start"] <= orig_y <= BACK_ICON_REGION["y_end"]:
                 self.show_page("login"); return
             
             # ----------------------------------------------------------------------
-            # 🟢 START: (แก้ไข 3) เปลี่ยนพิกัดปุ่มยืนยันหน้าแก้
+            # เปลี่ยนพิกัดปุ่มยืนยันหน้าแก้
             # ----------------------------------------------------------------------
             if FIX_PAGE_CONFIRM_REGION["x_start"] <= orig_x <= FIX_PAGE_CONFIRM_REGION["x_end"] and \
                FIX_PAGE_CONFIRM_REGION["y_start"] <= orig_y <= FIX_PAGE_CONFIRM_REGION["y_end"]:
                 print("Fix Page Confirm Clicked")
-                self.validate_fix_page_login() # 🟢 (เพิ่ม) เรียกใช้ฟังก์ชันตรวจสอบใหม่
+                self.validate_fix_page_login() 
                 return
-            # ----------------------------------------------------------------------
-            # 🟢 END: (แก้ไข 3)
-            # ----------------------------------------------------------------------
-            
 
-
-    # --- หมวดที่ 13: เมธอดการกระทำและการตรวจสอบ (Action/Validation Methods) ---
+    # --- หมวดที่ 13: เมธอดการกระทำและการตรวจสอบ ---
 
     def admin_prompt_for_table_edit(self):
         """
@@ -1272,7 +1218,7 @@ class ShabuApp(tk.Tk):
                 self.username_var.set(username) 
                 print(f"👤 User '{username}' logged in. Role: {user_role}. Profile path: {stored_image_path}")
                 
-                # 🟢 (แก้ไข) ถ้าเป็น Staff ให้ไปหน้า 'summary_page' (หน้ารวม) เลย
+                # ถ้าเป็น Staff ให้ไปหน้า 'summary_page' (หน้ารวม) เลย
                 if user_role == 'staff':
                     self.show_page("summary_page")
                 else:
@@ -1319,7 +1265,7 @@ class ShabuApp(tk.Tk):
             if conn: conn.close()
 
     # ----------------------------------------------------------------------
-    # 🟢 START: (เพิ่ม) ฟังก์ชันตรวจสอบสำหรับหน้า Fix Page
+    # ฟังก์ชันตรวจสอบสำหรับหน้า Fix Page
     # ----------------------------------------------------------------------
     def validate_fix_page_login(self):
         """ 🟢 NEW: Validates login from 'fix_page' to go to 'profile_page'. """
@@ -1332,10 +1278,10 @@ class ShabuApp(tk.Tk):
         conn = None
         try:
             conn = sqlite3.connect(DATABASE_PATH)
-            conn.row_factory = sqlite3.Row # ⭐️ สำคัญ: เพื่อให้ lookup_user_data (dict) ทำงาน
+            conn.row_factory = sqlite3.Row 
             cursor = conn.cursor()
             
-            # ⭐️ ใช้ SQL query เดียวกับ validate_admin_lookup
+           
             cursor.execute("SELECT username, phone, email, profile_image_path, password, role FROM users WHERE username = ? AND password = ?", (username, password))
             result = cursor.fetchone()
 
@@ -1352,9 +1298,6 @@ class ShabuApp(tk.Tk):
             self.lookup_user_data = {}
         finally:
             if conn: conn.close()
-    # ----------------------------------------------------------------------
-    # 🟢 END: (เพิ่ม)
-    # ----------------------------------------------------------------------
         
     def lookup_user_data_by_username(self, username):
         """Looks up user data when a user clicks their own profile (no password check)."""
@@ -1489,7 +1432,7 @@ class ShabuApp(tk.Tk):
             if conn: conn.close()
             
     # ----------------------------------------------------------------------
-    # 🟢 START: (แก้ไข) ลบ "ราคา" + แก้ไขการแทรกเมนู
+    # ลบ "ราคา" + แก้ไขการแทรกเมนู
     # ----------------------------------------------------------------------
     def process_add_item(self):
         global MENU_DATA, FOOD_ITEMS_LIST 
@@ -1507,7 +1450,7 @@ class ShabuApp(tk.Tk):
             messagebox.showwarning("ข้อมูลไม่ครบ", "กรุณาเลือกประเภทของสินค้า")
             return
             
-        price = 0 # 🟢 NEW: ตั้งราคาเป็น 0
+        price = 0 
         
         # --- Process Image ---
         try:
@@ -1530,10 +1473,10 @@ class ShabuApp(tk.Tk):
             "name": item_name,
             "image": new_filename,
             "description": "", 
-            "price": price # 🟢 CHANGED: ใช้ราคา 0
+            "price": price 
         }
         
-        # 🟢 (แก้ไข) ตรรกะการแทรกเมนู
+        # ตรรกะการแทรกเมนู
         inserted = False
         for i, item in enumerate(MENU_DATA):
             if item["category"] == category:
@@ -1562,9 +1505,6 @@ class ShabuApp(tk.Tk):
             self._load_menu_items()
             
         self.show_page("summary_page") 
-    # ----------------------------------------------------------------------
-    # 🟢 END: (แก้ไข)
-    # ----------------------------------------------------------------------
 
     def prompt_delete_menu_item(self):
         """Prompts the admin to delete an item from the global MENU_DATA."""
@@ -1638,15 +1578,15 @@ class ShabuApp(tk.Tk):
     def process_payment(self, person_count):
         """ 🟢 NEW: คำนวณราคาและแสดง QR popup """
         if person_count <= 0: return
-        # 🟢 (ใช้ค่าคงที่)
+       
         total_price = person_count * MONEY_PRICE_PER_PERSON 
         print(f"Processing payment for {person_count} people. Total: {total_price} THB")
         
-        # 🟢 (แก้ไข) เก็บค่าไว้สำหรับหน้าบิล
+        
         self.final_bill_amount = total_price
         self.final_bill_person_count = person_count
         
-        # 🟢 (เรียก Pop-up)
+        
         self._show_payment_popup(f"สำหรับ {person_count} คน", total_price) 
 
     def process_payment_custom(self):
@@ -1661,7 +1601,7 @@ class ShabuApp(tk.Tk):
         else:
             print("Custom payment cancelled.")
             
-    # 🟢 (เพิ่ม) ฟังก์ชันตัวช่วยสำหรับปุ่มยืนยัน
+    # ฟังก์ชันตัวช่วยสำหรับปุ่มยืนยัน
     def _on_confirm_payment(self, popup_window):
         """ 🟢 NEW: (เพิ่ม) ถูกเรียกเมื่อกดยืนยันใน QR Popup """
         print("Payment confirmed. Closing popup and going to Bill Page.")
@@ -1669,7 +1609,7 @@ class ShabuApp(tk.Tk):
         self.show_page("bill_page")
 
     # ----------------------------------------------------------------------
-    # 🟢 START: (แก้ไข 1) ฟังก์ชัน Pop-up จ่ายเงิน
+    #  Pop-up จ่ายเงิน
     # ----------------------------------------------------------------------
     def _show_payment_popup(self, person_name, amount):
         """
@@ -1682,33 +1622,30 @@ class ShabuApp(tk.Tk):
         popup.resizable(False, False)
         
         # ----------------------------------------------------------------------
-        # 🟢 START: (แก้ไข 1) เปลี่ยนชื่อไฟล์เป็น .jpg (ตามคำขอ)
+        # เปลี่ยนชื่อไฟล์เป็น .jpg 
         # ----------------------------------------------------------------------
-        qr_image_path = os.path.join(BASE_DIR, "qr.jpg") # 🟢 NEW: (แก้ไข 1) เปลี่ยนเป็น qr.jpg
-        # ----------------------------------------------------------------------
-        # 🟢 END: (แก้ไข 1)
-        # ----------------------------------------------------------------------
+        qr_image_path = os.path.join(BASE_DIR, "qr.jpg") # เปลี่ยนเป็น qr.jpg
         
         try:
             qr_image_open = Image.open(qr_image_path)
             qr_image_resized = qr_image_open.resize((250, 250), Image.Resampling.LANCZOS)
-            # ⭐️ ต้องเก็บ reference ของ PhotoImage ไว้
+           
             self.qr_photo_tk = ImageTk.PhotoImage(qr_image_resized) 
             
             qr_label = tk.Label(popup, image=self.qr_photo_tk, bg="#F0F8FF")
             qr_label.pack(pady=20)
 
         except FileNotFoundError:
-            # 🟢 (แก้ไข 1) อัปเดตข้อความ Error ให้ตรง
-            print(f"🔴 ERROR: ไม่พบไฟล์ 'qr.jpg' ที่: {qr_image_path}") # 🟢 NEW: (แก้ไข 1) อัปเดตข้อความ Error
+            
+            print(f"🔴 ERROR: ไม่พบไฟล์ 'qr.jpg' ที่: {qr_image_path}") 
             qr_label = tk.Label(popup, 
-                                text="ไม่พบไฟล์ 'qr.jpg'!", # 🟢 NEW: (แก้ไข 1) อัปเดตข้อความ Error
+                                text="ไม่พบไฟล์ 'qr.jpg'!", 
                                 fg="red", bg="#F0F8FF", font=("Arial", 16, "bold"))
-            qr_label.pack(pady=(100, 20)) # จัดให้อยู่กลางๆ
+            qr_label.pack(pady=(100, 20)) 
         except Exception as e:
-            # 🟢 (แก้ไข 1) อัปเดตข้อความ Error (กรณีไฟล์ .pdf จริง)
+            # อัปเดตข้อความ Error (กรณีไฟล์ .pdf จริง)
             print(f"🔴 ERROR loading {qr_image_path}: {e}")
-            error_text = f"เกิดข้อผิดพลาด: {e}\n\n(ไม่สามารถโหลด 'qr.jpg')" # 🟢 NEW: (แก้ไข 1) อัปเดตข้อความ Error
+            error_text = f"เกิดข้อผิดพลาด: {e}\n\n(ไม่สามารถโหลด 'qr.jpg')" 
             qr_label = tk.Label(popup, text=error_text, fg="red", bg="#F0F8FF", font=("Arial", 12))
             qr_label.pack(pady=(100, 20))
 
@@ -1725,19 +1662,16 @@ class ShabuApp(tk.Tk):
                                    font=("Arial", 14), 
                                    width=15,
                                    bg="#4CAF50", fg="white", 
-                                   # 🟢 (แก้ไข) เปลี่ยนคำสั่ง
+                                  
                                    command=lambda: self._on_confirm_payment(popup))
         confirm_button.pack(pady=15)
         
-        # --- ทำให้หน้าต่างนี้อยู่บนสุด ---
-        popup.grab_set() # บังคับให้ focus
-        popup.wait_window() # รอจนกว่าหน้าต่างนี้จะปิด
-    # ----------------------------------------------------------------------
-    # 🟢 END: (แก้ไข 1)
-    # ----------------------------------------------------------------------
+        
+        popup.grab_set() 
+        popup.wait_window() 
 
 
-# --- หมวดที่ 14: ฟังก์ชันช่วยโหลดรูปภาพ (Image Loading Helpers) ---
+# --- หมวดที่ 14: ฟังก์ชันช่วยโหลดรูปภาพ ---
 
     def select_profile_image(self, event):
         filepath = filedialog.askopenfilename(title="เลือกรูปโปรไฟล์", filetypes=[("Image Files", "*.png *.jpg *.jpeg *.gif *.bmp"), ("All Files", "*.*")])
@@ -1801,7 +1735,7 @@ class ShabuApp(tk.Tk):
             print(f"🔴 ERROR loading placeholder image: {e}")
 
 
-# --- หมวดที่ 15: ฟังก์ชันช่วยเลื่อน (Scrolling Helper) ---
+# --- หมวดที่ 15: ฟังก์ชันช่วยเลื่อน ---
     
     def scroll_menu_to_y(self, target_y):
         if self.current_page != "food_menu" or not hasattr(self, 'sub_canvas'): return
@@ -1826,7 +1760,7 @@ class ShabuApp(tk.Tk):
         except Exception as e: print(f"🔴 ERROR in scroll_to_y: {e}")
 
 
-# --- หมวดที่ 16: เมธอดแสดงหน้า (Page Display Methods) ---
+# --- หมวดที่ 16: เมธอดแสดงหน้า ---
 
     def _create_canvas_with_scrollbar(self, parent_frame):
         canvas = tk.Canvas(parent_frame, highlightthickness=0, bg="#FFFFFF")
@@ -1875,7 +1809,7 @@ class ShabuApp(tk.Tk):
         return w, h
 
 
-    # --- หน้าจอเลือกโต๊ะ (Table Selection) ---
+    # --- หน้าจอเลือกโต๊ะ ---
     def show_table_page(self):
         self.main_canvas = self._create_canvas_with_scrollbar(self.content_frame)
         frame_bg = "#D9534F"
@@ -1979,7 +1913,7 @@ class ShabuApp(tk.Tk):
         self.main_canvas.bind('<Configure>', self._on_resize_food_menu)
         self.after(100, lambda: self._on_resize_food_menu(None))
 
-    # 🟢 (แก้ไข) เอา Description ออก
+    
     def _load_menu_items(self):
         self.menu_image_references = []
         current_category = None
@@ -2040,7 +1974,7 @@ class ShabuApp(tk.Tk):
                                   font=("Arial", 16, "bold"), bg="#FEFEFE", anchor="w")
             name_label.pack(fill="x", pady=(5, 0))
 
-            # 🟢 (ลบ) ลบส่วน Description ออก
+          
             
             add_button = tk.Button(item_frame, text="  +  ", font=("Arial", 16, "bold"), 
                                    command=lambda name=item["name"]: self.prompt_for_quantity(name), 
@@ -2054,7 +1988,7 @@ class ShabuApp(tk.Tk):
             image_label.bind("<Button-1>", click_callback)
             text_frame.bind("<Button-1>", click_callback)
             name_label.bind("<Button-1>", click_callback)
-            # description_label.bind("<Button-1>", click_callback) # 🟢 (ลบ)
+            
 
             current_col += 1
             if current_col >= max_cols:
@@ -2216,7 +2150,7 @@ class ShabuApp(tk.Tk):
         except Exception as e: print(f"🔴 ERROR in _on_resize_summary_page: {e}")
 
 
-    # --- หน้าลงทะเบียน (Register) ---
+    # --- หน้าลงทะเบียน ---
     def show_register_page(self):
         self.main_canvas = self._create_canvas_with_scrollbar(self.content_frame)
         frame_bg = "#FFFFFF"; widget_bg="#F0F0F0"
@@ -2274,7 +2208,7 @@ class ShabuApp(tk.Tk):
 
         except Exception as e: print(f"🔴 ERROR in _on_resize_register_page: {e}")
 
-    # --- หน้าลืมรหัสผ่าน (Forgot Password) ---
+    # --- หน้าลืมรหัสผ่าน ---
     def show_forgot_page(self):
         self.main_canvas = self._create_canvas_with_scrollbar(self.content_frame)
         frame_bg="#FFFFFF"; widget_bg="#F0F0F0"
@@ -2307,7 +2241,7 @@ class ShabuApp(tk.Tk):
             self._place_and_scale_widget(self.forgot_phone_entry, ORIG_FORGOT_PHONE_BOX, scale_factor, self.background_label)
         except Exception as e: print(f"🔴 ERROR in _on_resize_forgot_page: {e}")
 
-    # 🟢 (แก้ไข) หน้า Admin Edit - เปลี่ยนเป็นหน้า "จัดการโต๊ะ" (UI ใหม่)
+    
     def show_admin_edit_page(self):
         self.main_canvas = self._create_canvas_with_scrollbar(self.content_frame)
         frame_bg="#ADD8E6"
@@ -2315,7 +2249,7 @@ class ShabuApp(tk.Tk):
         self.background_label = tk.Label(self.scrollable_frame_admin, image=None, borderwidth=0, bg=frame_bg)
         self.background_label.pack(); self.background_label.bind('<Button-1>', self.get_click_position)
 
-        # 🟢 (เพิ่ม) สร้างป้ายสถานะโต๊ะ (เหมือนหน้า table_page)
+        
         self.table_status_labels_admin_page = [
             tk.Label(self.background_label, text="", font=("Arial", 10, "bold"), bg=frame_bg) 
             for _ in TABLE_CENTERS
@@ -2340,7 +2274,7 @@ class ShabuApp(tk.Tk):
             self.background_label.config(image=getattr(self, tk_image_attr), width=target_width, height=target_height)
             self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
             
-            # 🟢 (เพิ่ม) วางป้ายสถานะโต๊ะ (เหมือน _on_resize_table_page)
+            # วางป้ายสถานะโต๊ะ 
             for i, label in enumerate(self.table_status_labels_admin_page):
                 if i < len(TABLE_REGIONS) and i < len(TABLE_ALIGNMENT_CENTERS):
                     align_coords = TABLE_ALIGNMENT_CENTERS[i]
@@ -2364,7 +2298,7 @@ class ShabuApp(tk.Tk):
 
         except Exception as e: print(f"🔴 ERROR in _on_resize_admin_edit_page: {e}")
 
-# --- หน้าจอแสดงโปรไฟล์ (Profile Display) ---
+# --- หน้าจอแสดงโปรไฟล์ ---
     def show_profile_page(self):
         self.main_canvas = self._create_canvas_with_scrollbar(self.content_frame)
         frame_bg = "#E8F8F5"; widget_bg="#F0F0F0"
@@ -2429,9 +2363,7 @@ class ShabuApp(tk.Tk):
 
         except Exception as e: print(f"🔴 ERROR in _on_resize_profile_page: {e}")
         
-    # ----------------------------------------------------------------------
-    # 🟢 START: (แก้ไข) หน้า "เพิ่มสินค้า" (ลบช่อง ราคา)
-    # ----------------------------------------------------------------------
+    
     def show_add_item_page(self):
         self.main_canvas = self._create_canvas_with_scrollbar(self.content_frame)
         frame_bg="#FFFFFF"; widget_bg="#F0F0F0"
@@ -2451,7 +2383,7 @@ class ShabuApp(tk.Tk):
         self.add_item_cat_optionmenu.config(font=("Arial", 12), relief="flat", bd=0, bg=widget_bg, activebackground=widget_bg, highlightthickness=0, anchor='w')
         self.add_item_cat_optionmenu['menu'].config(font=("Arial", 12), bg=widget_bg)
 
-        # (ลบ Price Widgets)
+       
 
         self.main_canvas.bind('<Configure>', self._on_resize_add_item_page)
         self.after(100, lambda: self._on_resize_add_item_page(None))
@@ -2482,7 +2414,7 @@ class ShabuApp(tk.Tk):
             if hasattr(self, 'add_item_cat_optionmenu') and 'menu' in self.add_item_cat_optionmenu.cget('menu'):
                        self.add_item_cat_optionmenu['menu'].config(font=("Arial", font_size))
 
-            # (ลบ Price Widgets)
+            
 
             if hasattr(self, 'add_item_image_label'):
                 pw, ph = self._place_and_scale_widget(self.add_item_image_label, ORIG_ADD_ITEM_IMAGE_BOX, scale_factor, self.background_label)
@@ -2492,12 +2424,9 @@ class ShabuApp(tk.Tk):
                     self.load_placeholder_image('add_item_image_label', 'placeholder_image_tk', (pw, ph))
 
         except Exception as e: print(f"🔴 ERROR in _on_resize_add_item_page: {e}")
+    
     # ----------------------------------------------------------------------
-    # 🟢 END: (แก้ไข)
-    # ----------------------------------------------------------------------
-
-    # ----------------------------------------------------------------------
-    # 🟢 START: (แก้ไข) หน้า Order Status
+    # หน้า Order Status
     # ----------------------------------------------------------------------
     def show_order_status_page(self):
         self.main_canvas = self._create_canvas_with_scrollbar(self.content_frame)
@@ -2536,13 +2465,13 @@ class ShabuApp(tk.Tk):
                                 _, th = self._place_and_scale_widget(self.order_status_text_box,
                                                  ORIG_ORDER_STATUS_BOX,
                                                  scale_factor, self.background_label)
-                                # 🟢 (แก้ไข) เพิ่มขนาด Font
+                               
                                 font_size = max(10, int(th * 0.035)) 
                                 self.order_status_text_box.config(font=("Tahoma", font_size))
                                 
         except Exception as e: print(f"🔴 ERROR in _on_resize_order_status_page: {e}")
 
-    # 🟢 (แก้ไข) แก้ไขเวลา + ขนาดตัวอักษร
+    
     def load_order_statuses(self):
         """Fetches pending orders from DB and displays them grouped by table."""
         if not hasattr(self, 'order_status_text_box'): return
@@ -2551,7 +2480,7 @@ class ShabuApp(tk.Tk):
         self.order_status_text_box.delete("1.0", "end")
 
         orders_by_table = defaultdict(lambda: defaultdict(list))
-        order_times = {} # 🟢 NEW: Store time
+        order_times = {} 
         conn = None
         try:
             conn = sqlite3.connect(DATABASE_PATH)
@@ -2576,24 +2505,24 @@ class ShabuApp(tk.Tk):
             for table, order_id, order_time, item, qty in all_items:
                 orders_by_table[table][order_id].append(f"  - {item} x {qty}")
                 if order_id not in order_times:
-                    # 🟢 (แก้ไข) แปลงเวลา + บวก 7 ชั่วโมง (เวลาไทย)
+                    
                     try:
-                        # (Format: 2025-11-09 14:45:00) - SQLite/UTC
+                        
                         dt_utc = datetime.datetime.fromisoformat(order_time)
                         dt_thai = dt_utc + timedelta(hours=7)
-                        # (Format: 09/11/2025 21:45:00) - Thai
+                    
                         time_str = dt_thai.strftime("%d/%m/%Y %H:%M:%S")
                     except Exception as e:
                         print(f"Error parsing time: {e}")
-                        time_str = order_time # Fallback
+                        time_str = order_time 
                     order_times[order_id] = time_str
 
-            # 🟢 (แก้ไข) ตั้งค่า Tags (เพิ่มขนาด)
+        
             self.order_status_text_box.tag_configure("table_header", font=("Tahoma", 18, "bold"), spacing3=10, underline=True)
             self.order_status_text_box.tag_configure("order_header", font=("Tahoma", 16, "italic"), lmargin1=10, spacing1=5)
             self.order_status_text_box.tag_configure("item", font=("Tahoma", 16), spacing1=5, lmargin1=25)
             
-            # แสดงผล
+            
             for table_name, orders in orders_by_table.items():
                 self.order_status_text_box.insert("end", f"{table_name}:\n", "table_header")
                 
@@ -2607,12 +2536,9 @@ class ShabuApp(tk.Tk):
         finally:
             if conn: conn.close()
             self.order_status_text_box.config(state="disabled")
-    # ----------------------------------------------------------------------
-    # 🟢 END: (แก้ไข)
-    # ----------------------------------------------------------------------
-
-    # ----------------------------------------------------------------------
-    # 🟢 START: (แก้ไข) หน้าเงิน (ปรับแก้)
+    
+    # ---------------------------------------------------------------------
+    # หน้าเงิน
     # ----------------------------------------------------------------------
     def show_money_page(self):
         self.main_canvas = self._create_canvas_with_scrollbar(self.content_frame)
@@ -2659,12 +2585,9 @@ class ShabuApp(tk.Tk):
             self.background_label.config(image=None, width=canvas_width, height=bg_height)
             self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
 
+    
     # ----------------------------------------------------------------------
-    # 🟢 END: (แก้ไข)
-    # ----------------------------------------------------------------------
-
-    # ----------------------------------------------------------------------
-# 🟢 START: (แก้ไขใหม่ทั้งหมด) หน้าบิล (Bill Page)
+# หน้าบิล
 # ----------------------------------------------------------------------
 
     def show_bill_page(self):
@@ -2776,7 +2699,7 @@ class ShabuApp(tk.Tk):
         if canvas_width < 50: return
         
         effective_scale = 1.0
-        orig_width = 1366 # (ใช้ค่าคงที่)
+        orig_width = 1366 
 
         if bg_image:
             try:
@@ -2795,7 +2718,7 @@ class ShabuApp(tk.Tk):
                 bg_image = None # (บังคับให้ไปที่ else)
         
         if not bg_image: 
-            effective_scale = canvas_width / float(orig_width) # ⭐️ (สำคัญ) คำนวณ scale โดยอิง 1366
+            effective_scale = canvas_width / float(orig_width)
             self.current_scale_factor = effective_scale
             
             bg_height = self.main_canvas.winfo_height()
@@ -2804,10 +2727,10 @@ class ShabuApp(tk.Tk):
             self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
 
 
-        # (วาง Labels ทั้งหมด)
+        
         try:
             # ----------------------------------------------------------------------
-            # 🟢 START: (แก้ไข) คำนวณ x-position ใหม่ทั้งหมด
+            # คำนวณ x-position
             # ----------------------------------------------------------------------
             
             # 1. หาค่า scale ที่ถูกต้อง
@@ -2841,34 +2764,32 @@ class ShabuApp(tk.Tk):
                 
                 # สร้าง config ใหม่ขึ้นมา
                 temp_config = {
-                    "x": final_start_x / scale, # ⭐️ De-scale X
-                    "y": orig_config["y"], # (ใช้ Y, H เดิมจาก config)
-                    "width": BILL_CONTENT_WIDTH, # ⭐️ De-scale W
+                    "x": final_start_x / scale, 
+                    "y": orig_config["y"], 
+                    "width": BILL_CONTENT_WIDTH,
                     "height": orig_config["height"]
                 }
                 
                 self._place_and_scale_widget(widget, temp_config, scale, self.background_label)
 
-            # ----------------------------------------------------------------------
-            # 🟢 END: (แก้ไข)
-            # ----------------------------------------------------------------------
+            
         except Exception as e:
                  print(f"🔴 ERROR in _on_resize_bill_page (widget place): {e}")
 
 # ----------------------------------------------------------------------
-# 🟢 END: (แก้ไขใหม่ทั้งหมด) หน้าบิล (Bill Page)
+# หน้าบิล (Bill Page)
 # ----------------------------------------------------------------------
         else:
-            self.current_scale_factor = 1.0 # (ตั้งค่าพื้นฐาน)
+            self.current_scale_factor = 1.0 
             bg_height = self.main_canvas.winfo_height()
-            if bg_height < 50: bg_height = 800 # (ตั้งค่า default)
+            if bg_height < 50: bg_height = 800 
             self.background_label.config(image=None, width=canvas_width, height=bg_height)
             self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
 
         
 
     # ----------------------------------------------------------------------
-    # 🟢 START: (แก้ไข 1) ฟังก์ชัน Pop-up จ่ายเงิน
+    # ฟังก์ชัน Pop-up จ่ายเงิน
     # ----------------------------------------------------------------------
     def _show_payment_popup(self, person_name, amount):
         """
@@ -2881,33 +2802,30 @@ class ShabuApp(tk.Tk):
         popup.resizable(False, False)
         
         # ----------------------------------------------------------------------
-        # 🟢 START: (แก้ไข 1) เปลี่ยนชื่อไฟล์เป็น .jpg (ตามคำขอ)
+        # เปลี่ยนชื่อไฟล์เป็น .jpg 
         # ----------------------------------------------------------------------
-        qr_image_path = os.path.join(BASE_DIR, "qr.jpg") # 🟢 NEW: (แก้ไข 1) เปลี่ยนเป็น qr.jpg
-        # ----------------------------------------------------------------------
-        # 🟢 END: (แก้ไข 1)
-        # ----------------------------------------------------------------------
+        qr_image_path = os.path.join(BASE_DIR, "qr.jpg") # เปลี่ยนเป็น qr.jpg
         
         try:
             qr_image_open = Image.open(qr_image_path)
             qr_image_resized = qr_image_open.resize((250, 250), Image.Resampling.LANCZOS)
-            # ⭐️ ต้องเก็บ reference ของ PhotoImage ไว้
+            
             self.qr_photo_tk = ImageTk.PhotoImage(qr_image_resized) 
             
             qr_label = tk.Label(popup, image=self.qr_photo_tk, bg="#F0F8FF")
             qr_label.pack(pady=20)
 
         except FileNotFoundError:
-            # 🟢 (แก้ไข 1) อัปเดตข้อความ Error ให้ตรง
-            print(f"🔴 ERROR: ไม่พบไฟล์ 'qr.jpg' ที่: {qr_image_path}") # 🟢 NEW: (แก้ไข 1) อัปเดตข้อความ Error
+            
+            print(f"🔴 ERROR: ไม่พบไฟล์ 'qr.jpg' ที่: {qr_image_path}") 
             qr_label = tk.Label(popup, 
-                                text="ไม่พบไฟล์ 'qr.jpg'!", # 🟢 NEW: (แก้ไข 1) อัปเดตข้อความ Error
+                                text="ไม่พบไฟล์ 'qr.jpg'!", 
                                 fg="red", bg="#F0F8FF", font=("Arial", 16, "bold"))
-            qr_label.pack(pady=(100, 20)) # จัดให้อยู่กลางๆ
+            qr_label.pack(pady=(100, 20)) 
         except Exception as e:
-            # 🟢 (แก้ไข 1) อัปเดตข้อความ Error (กรณีไฟล์ .pdf จริง)
+            
             print(f"🔴 ERROR loading {qr_image_path}: {e}")
-            error_text = f"เกิดข้อผิดพลาด: {e}\n\n(ไม่สามารถโหลด 'qr.jpg')" # 🟢 NEW: (แก้ไข 1) อัปเดตข้อความ Error
+            error_text = f"เกิดข้อผิดพลาด: {e}\n\n(ไม่สามารถโหลด 'qr.jpg')" 
             qr_label = tk.Label(popup, text=error_text, fg="red", bg="#F0F8FF", font=("Arial", 12))
             qr_label.pack(pady=(100, 20))
 
@@ -2928,15 +2846,12 @@ class ShabuApp(tk.Tk):
         confirm_button.pack(pady=15)
         
         # --- ทำให้หน้าต่างนี้อยู่บนสุด ---
-        popup.grab_set() # บังคับให้ focus
-        popup.wait_window() # รอจนกว่าหน้าต่างนี้จะปิด
+        popup.grab_set() 
+        popup.wait_window() 
+   
+  
     # ----------------------------------------------------------------------
-    # 🟢 END: (แก้ไข 1)
-    # ----------------------------------------------------------------------
-       
-    # ไปเอามาใส่ตรงนี้
-    # ----------------------------------------------------------------------
-    # 🟢 START: (เพิ่ม) หน้าบิล (Bill Page)
+    # หน้าบิล (Bill Page)
     # ----------------------------------------------------------------------
     def show_bill_page(self):
         """ 🟢 NEW: (เพิ่ม) แสดงหน้าบิล (หน้าสรุปยอด) """
@@ -2963,10 +2878,10 @@ class ShabuApp(tk.Tk):
         amount_before_vat = total_amount / (1 + VAT_RATE)
         vat_amount = total_amount - amount_before_vat
 
-        # 🟢 NEW: (เพิ่ม) ตั้งค่าความยาวเส้นคั่น
+        # ตั้งค่าความยาวเส้นคั่น
         self.bill_divider_var.set("-" * 80) 
         
-        # --- 2. ตั้งค่า StringVars (🟢 แก้ไข: จัดชิดซ้าย-ขวา) ---
+        # --- 2. ตั้งค่า StringVars ---
         
         # (Header)
         self.bill_header_l1_var.set("Mooay Noi Shabu")
@@ -2974,7 +2889,7 @@ class ShabuApp(tk.Tk):
         self.bill_header_l3_var.set("อ.เมือง จ.ขอนแก่น 40000")
         self.bill_header_l4_var.set("โทร. 0XX-XXX-XXXX | เลขประจำตัวผู้เสียภาษี: 0123456789012")
         
-        # 🟢 (เพิ่ม) กำหนดความกว้างคอลัมน์
+        # กำหนดความกว้างคอลัมน์
         RECEIPT_LINE_WIDTH = 48 # (ความกว้างรวมโดยประมาณ)
         LEFT_COL_WIDTH = 32     # (ความกว้างคอลัมน์ซ้าย)
         RIGHT_COL_WIDTH = 15    # (ความกว้างคอลัมน์ขวา)
@@ -2982,31 +2897,30 @@ class ShabuApp(tk.Tk):
         # (Info - จัดชิดซ้าย)
         table_name = self.current_table_name_var.get() or "N/A"
         current_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
-        self.bill_info_l1_var.set(f"โต๊ะ: {table_name} วันที่: {current_time}".ljust(RECEIPT_LINE_WIDTH)) # 🟢 (จัดชิดซ้าย)
+        self.bill_info_l1_var.set(f"โต๊ะ: {table_name} วันที่: {current_time}".ljust(RECEIPT_LINE_WIDTH)) 
         
         # (Body - จัดซ้าย/ขวา)
         header_l = "รายการ (Description)"
         header_r = "จำนวนเงิน (Amount)"
-        self.bill_body_header_var.set(f"{header_l.ljust(LEFT_COL_WIDTH)} {header_r.rjust(RIGHT_COL_WIDTH)}") # 🟢 (จัดฟอร์แมต)
+        self.bill_body_header_var.set(f"{header_l.ljust(LEFT_COL_WIDTH)} {header_r.rjust(RIGHT_COL_WIDTH)}") 
 
         item_l = f"บุฟเฟ่ต์ชาบู ({person_count} ท่าน)"
         item_r = f"{total_amount:.2f}"
-        self.bill_body_item_var.set(f"{item_l.ljust(LEFT_COL_WIDTH)} {item_r.rjust(RIGHT_COL_WIDTH)}") # 🟢 (จัดฟอร์แมต)
+        self.bill_body_item_var.set(f"{item_l.ljust(LEFT_COL_WIDTH)} {item_r.rjust(RIGHT_COL_WIDTH)}") 
 
         # (Total - จัดซ้าย/ขวา)
         sub_l = "ยอดรวม (Total):"
         sub_r = f"{amount_before_vat:.2f}"
-        self.bill_subtotal_var.set(f"{sub_l.ljust(LEFT_COL_WIDTH)} {sub_r.rjust(RIGHT_COL_WIDTH)}") # 🟢 (จัดฟอร์แมต)
+        self.bill_subtotal_var.set(f"{sub_l.ljust(LEFT_COL_WIDTH)} {sub_r.rjust(RIGHT_COL_WIDTH)}") 
 
         vat_l = "ภาษีมูลค่าเพิ่ม (VAT 7%):"
         vat_r = f"{vat_amount:.2f}"
-        self.bill_vat_var.set(f"{vat_l.ljust(LEFT_COL_WIDTH)} {vat_r.rjust(RIGHT_COL_WIDTH)}") # 🟢 (จัดฟอร์แมต)
+        self.bill_vat_var.set(f"{vat_l.ljust(LEFT_COL_WIDTH)} {vat_r.rjust(RIGHT_COL_WIDTH)}") 
 
         total_l = "ยอดสุทธิ (Grand Total):"
         total_r = f"{total_amount:.2f}"
-        self.bill_total_var.set(f"{total_l.ljust(LEFT_COL_WIDTH)} {total_r.rjust(RIGHT_COL_WIDTH)}") # 🟢 (จัดฟอร์แมต)
-
-        # (Footer - กลับมาจัดกลาง)
+        self.bill_total_var.set(f"{total_l.ljust(LEFT_COL_WIDTH)} {total_r.rjust(RIGHT_COL_WIDTH)}") 
+        
         self.bill_footer1_var.set("(ชำระแล้วโดย QR Code)")
         self.bill_footer2_var.set("ขอบคุณที่มาอุดหนุนนะคะ 💖")
 
@@ -3071,9 +2985,9 @@ class ShabuApp(tk.Tk):
             except Exception as e: 
                 print(f"🔴 ERROR in _on_resize_bill_page (image load): {e}")
         else:
-            self.current_scale_factor = 1.0 # (ตั้งค่าพื้นฐาน)
+            self.current_scale_factor = 1.0 
             bg_height = self.main_canvas.winfo_height()
-            if bg_height < 50: bg_height = 800 # (ตั้งค่า default)
+            if bg_height < 50: bg_height = 800 
             self.background_label.config(image=None, width=canvas_width, height=bg_height)
             self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
 
@@ -3097,19 +3011,15 @@ class ShabuApp(tk.Tk):
             self._place_and_scale_widget(self.bill_f2, ORIG_BILL_FOOTER2, scale, self.background_label)
         except Exception as e:
                  print(f"🔴 ERROR in _on_resize_bill_page (widget place): {e}")
-    # ----------------------------------------------------------------------
-    # 🟢 END: (เพิ่ม)
-    # ----------------------------------------------------------------------
-
 
     # ----------------------------------------------------------------------
-    # 🟢 START: (แก้ไข 4) หน้าแก้ (เพิ่ม UI Login)
+    # หน้าแก้ (เพิ่ม UI Login)
     # ----------------------------------------------------------------------
     def show_fix_page(self):
         self.main_canvas = self._create_canvas_with_scrollbar(self.content_frame)
         frame_bg = "#CCCCCC" # (สีเทา ถ้าไม่มีรูป)
         
-        # 🟢 (แก้ไข) ตั้งค่าพื้นหลังตามรูป ถ้ามี
+        # ตั้งค่าพื้นหลังตามรูป ถ้ามี
         if self.original_fix_page_image:
             frame_bg = "#FFFFFF" # (หรือสีที่เข้ากับรูป)
             
@@ -3119,9 +3029,9 @@ class ShabuApp(tk.Tk):
         self.background_label.pack(); 
         self.background_label.bind('<Button-1>', self.get_click_position)
 
-        # 🟢 (ลบ) ลบ placeholder
+       
 
-        # 🟢 (เพิ่ม) สร้าง UI fields (เหมือนหน้า Login)
+        # สร้าง UI fields (เหมือนหน้า Login)
         self.fix_username_text_label = tk.Label(self.background_label, text="ชื่อผู้ใช้:", font=("Arial", 10, "bold"), anchor="w", bg=frame_bg, fg="#C74136")
         self.fix_password_text_label = tk.Label(self.background_label, text="รหัสผ่าน:", font=("Arial", 10, "bold"), anchor="w", bg=frame_bg, fg="#C74136")
         self.fix_username_entry = tk.Entry(self.background_label, textvariable=self.fix_username_var, font=("Arial", 12), relief="flat", bd=0, bg="white")
@@ -3147,17 +3057,10 @@ class ShabuApp(tk.Tk):
                 setattr(self, tk_image_attr, ImageTk.PhotoImage(resized_img))
                 self.background_label.config(image=getattr(self, tk_image_attr), width=target_width, height=target_height)
                 self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
-
-                # ----------------------------------------------------------------------
-                # 🟢 START: (แก้ไข 4) ขยับกรอบช่องกรอกลง (ใช้พิกัดใหม่)
-                # ----------------------------------------------------------------------
                 self._place_and_scale_widget(self.fix_username_text_label, ORIG_FIX_USERNAME_LABEL, scale_factor, self.background_label, is_label=True, bold=True)
                 self._place_and_scale_widget(self.fix_username_entry, ORIG_FIX_USERNAME_BOX, scale_factor, self.background_label)
                 self._place_and_scale_widget(self.fix_password_text_label, ORIG_FIX_PASSWORD_LABEL, scale_factor, self.background_label, is_label=True, bold=True)
                 self._place_and_scale_widget(self.fix_password_entry, ORIG_FIX_PASSWORD_BOX, scale_factor, self.background_label)
-                # ----------------------------------------------------------------------
-                # 🟢 END: (แก้ไข 4)
-                # ----------------------------------------------------------------------
 
             except Exception as e: 
                 print(f"🔴 ERROR in _on_resize_fix_page (image load): {e}")
@@ -3165,16 +3068,11 @@ class ShabuApp(tk.Tk):
         else: # (ถ้าไม่มีรูป)
             self.current_scale_factor = 1.0
             bg_height = self.main_canvas.winfo_height()
-            if bg_height < 50: bg_height = 800 # (ตั้งค่า default)
+            if bg_height < 50: bg_height = 800 
                 
             self.background_label.config(image=None, width=canvas_width, height=bg_height)
             self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
-
-            # ----------------------------------------------------------------------
-            # 🟢 START: (แก้ไข 4) ขยับกรอบช่องกรอกลง (กรณีไม่มีรูป)
-            # ----------------------------------------------------------------------
             x_center = canvas_width // 2
-            # (ใช้พิกัด Y ที่ขยับแล้ว จาก ORIG_FIX_...)
             y_label1 = int(ORIG_FIX_USERNAME_LABEL['y'] * self.current_scale_factor)
             y_box1 = int(ORIG_FIX_USERNAME_BOX['y'] * self.current_scale_factor)
             y_label2 = int(ORIG_FIX_PASSWORD_LABEL['y'] * self.current_scale_factor)
@@ -3184,22 +3082,14 @@ class ShabuApp(tk.Tk):
             self.fix_username_entry.place(x=x_center, y=y_box1, width=300, height=40, anchor="n")
             self.fix_password_text_label.place(x=x_center, y=y_label2, width=300, height=30, anchor="n")
             self.fix_password_entry.place(x=x_center, y=y_box2, width=300, height=40, anchor="n")
-            # ----------------------------------------------------------------------
-            # 🟢 END: (แก้ไข 4)
-            # ----------------------------------------------------------------------
 
         # (ลบ placeholder)
         if hasattr(self, 'fix_placeholder_label'):
             self.fix_placeholder_label.place_forget()
-    # ----------------------------------------------------------------------
-    # 🟢 END: (แก้ไข 4)
-    # ----------------------------------------------------------------------
-
-
+    
 # --- เรียกใช้งานโปรแกรม (Run the application) ---
 if __name__ == "__main__":
     print("🚀 Starting Shabu Shabu App...")
-    # 🟢 (แก้ไข) เพิ่ม 'fix_page_bg' ในไฟล์ที่อนุญาตให้หายไปได้
     missing_files = [name for name, path in IMAGE_PATHS.items() if (not os.path.exists(path) and name not in ["money_page_bg", "fix_page_bg", "bill_page_bg"])]
     if missing_files:
         msg = "Cannot start. Missing image files:\n\n" + "\n".join([f"- {name} ({IMAGE_PATHS[name]})" for name in missing_files])
